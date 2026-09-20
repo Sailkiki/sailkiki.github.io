@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GECO-GS：面向驾驶场景视点外推的几何约束动态三维高斯场景。">
+  <title>GECO-GS｜驾驶场景视点外推</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="page-width">
+  <h1 class="page-title">部分实验结果展示</h1>
+  <section class="intro" id="top">
+    <p><span class="latin">GECO-GS</span> 针对动态驾驶场景在新视点下出现的道路凹陷、建筑错位和车辆形状不稳定等问题，在训练阶段加入世界坐标表面、车辆自身坐标表面和激光雷达射线距离监督；推理阶段仍使用原始相机渲染器。</p>
+    <p class="note">页面中的几何结果使用回投影激光雷达深度评估。外观指标仅对应训练视角，不代表未见视角的彩色图像测试指标。</p>
+  </section>
+
+  <section id="tables">
+    <div class="section-title-row"><p class="section-label">一、定量结果</p><p class="section-side">五个驾驶场景的均值；误差单位为米</p></div>
+
+    <h2>表 1　右向横移下的全场景深度误差</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>方法（发表信息）</th><th><span class="math">0 m</span></th><th><span class="math">1 m</span></th><th><span class="math">2 m</span></th><th><span class="math">3 m</span></th></tr></thead>
+      <tbody>
+        <tr><th><span class="latin">2DGS</span>（<span class="latin">SIGGRAPH 2024</span>）</th><td>1.466 ± 0.189</td><td>1.438 ± 0.136</td><td>1.594 ± 0.170</td><td>2.045 ± 0.709</td></tr>
+        <tr><th><span class="latin">StreetGS</span>（<span class="latin">ECCV 2024</span>）</th><td>1.464 ± 0.486</td><td>1.442 ± 0.340</td><td>1.783 ± 0.243</td><td>2.376 ± 0.606</td></tr>
+        <tr><th><span class="latin">IDSplat</span>（<span class="latin">CVPR 2026</span>）</th><td>2.149 ± 0.569</td><td>2.005 ± 0.540</td><td>2.189 ± 0.530</td><td>2.721 ± 0.928</td></tr>
+        <tr><th><span class="latin">PVG</span>（<span class="latin">IJCV 2026</span>）</th><td>1.529 ± 0.258</td><td>1.763 ± 0.269</td><td>2.123 ± 0.313</td><td>2.745 ± 0.608</td></tr>
+        <tr><th><span class="latin">OmniRe</span>（<span class="latin">ICLR 2025</span>）</th><td>0.835 ± 0.149</td><td>0.877 ± 0.117</td><td>1.151 ± 0.074</td><td>1.706 ± 0.755</td></tr>
+        <tr class="ours"><th><span class="latin">GECO-GS</span>（本文）</th><td>0.796 ± 0.139</td><td>0.835 ± 0.112</td><td>1.089 ± 0.101</td><td>1.637 ± 0.764</td></tr>
+      </tbody>
+    </table></div>
+    <p class="table-caption">注：<span class="math">0 m</span> 仅作为记录视角的基准；主页重点关注 <span class="math">1–3 m</span> 的横向视点外推。数值为均值 ± 总体标准差。</p>
+
+    <h2>表 2　几何指标对比</h2>
+    <div class="table-wrap"><table>
+      <thead>
+        <tr><th>方法（发表信息）</th><th colspan="4"><span class="math">+3 m</span> 横向右移</th><th colspan="4"><span class="math">+60°</span> 正向偏航</th></tr>
+        <tr><th></th><th>静态区域<br><span class="math">L1↓</span></th><th>车辆区域<br><span class="math">L1↓</span></th><th><span class="math">Inlier₀.₅↑</span></th><th><span class="math">Chamfer-L1↓</span></th><th>静态区域<br><span class="math">L1↓</span></th><th>车辆区域<br><span class="math">L1↓</span></th><th><span class="math">Inlier₀.₅↑</span></th><th><span class="math">Chamfer-L1↓</span></th></tr>
+      </thead>
+      <tbody>
+        <tr><th><span class="latin">2DGS</span>（<span class="latin">SIGGRAPH 2024</span>）</th><td>1.735</td><td>3.854</td><td>0.601</td><td>0.313</td><td>1.234</td><td>3.202</td><td>0.616</td><td>0.289</td></tr>
+        <tr><th><span class="latin">StreetGS</span>（<span class="latin">ECCV 2024</span>）</th><td>2.112</td><td>4.280</td><td>0.520</td><td>0.311</td><td>1.350</td><td>2.809</td><td>0.617</td><td>0.240</td></tr>
+        <tr><th><span class="latin">IDSplat</span>（<span class="latin">CVPR 2026</span>）</th><td>2.567</td><td>4.314</td><td>0.547</td><td>0.400</td><td>2.114</td><td>3.452</td><td>0.572</td><td>0.384</td></tr>
+        <tr><th><span class="latin">PVG</span>（<span class="latin">IJCV 2026</span>）</th><td>2.532</td><td>4.504</td><td>0.303</td><td>0.598</td><td>2.094</td><td>4.514</td><td>0.328</td><td>0.579</td></tr>
+        <tr><th><span class="latin">OmniRe</span>（<span class="latin">ICLR 2025</span>）</th><td>1.591</td><td>2.795</td><td>0.663</td><td>0.236</td><td>0.769</td><td>1.834</td><td>0.755</td><td>0.178</td></tr>
+        <tr class="ours"><th><span class="latin">GECO-GS</span>（本文）</th><td>1.508</td><td>2.723</td><td>0.689</td><td>0.229</td><td>0.723</td><td>1.797</td><td>0.773</td><td>0.176</td></tr>
+      </tbody>
+    </table></div>
+    <p class="table-caption">注：<span class="math">L1</span> 为有效像素上的平均绝对深度误差；<span class="math">Inlier₀.₅</span> 为误差小于 <span class="math">0.5 m</span> 的有效像素比例；箭头表示指标优劣方向。</p>
+
+    <h2>表 3　基线方法的出处</h2>
+    <div class="table-wrap narrow-table"><table>
+      <thead><tr><th>方法</th><th>论文名称</th><th>发表会议或期刊（年份）</th><th>本文中的使用方式</th></tr></thead>
+      <tbody>
+        <tr><th><span class="latin">2DGS</span></th><td><span class="latin">2D Gaussian Splatting for Geometrically Accurate Radiance Fields</span></td><td><span class="latin">ACM SIGGRAPH, 2024</span></td><td>接入动态场景图的评测变体</td></tr>
+        <tr><th><span class="latin">StreetGS</span></th><td><span class="latin">Street Gaussians: Modeling Dynamic Urban Scenes with Gaussian Splatting</span></td><td><span class="latin">ECCV, 2024</span></td><td>使用 <span class="latin">Drivestudio</span> 实现</td></tr>
+        <tr><th><span class="latin">IDSplat</span></th><td><span class="latin">Instance-Decomposed 3D Gaussian Splatting for Driving Scenes</span></td><td><span class="latin">CVPR, 2026</span></td><td>使用官方 <span class="latin">Nerfstudio</span> 实现及评测桥接</td></tr>
+        <tr><th><span class="latin">PVG</span></th><td><span class="latin">Periodic Vibration Gaussian</span></td><td><span class="latin">International Journal of Computer Vision, 2026</span></td><td>使用 <span class="latin">Drivestudio</span> 实现</td></tr>
+        <tr><th><span class="latin">OmniRe</span></th><td><span class="latin">OmniRe: Omni Urban Scene Reconstruction</span></td><td><span class="latin">ICLR, 2025</span></td><td>基础动态场景图与对比方法</td></tr>
+      </tbody>
+    </table></div>
+    <p class="table-caption">发表 venue 与年份按当前公开论文记录填写；<span class="latin">IDSplat</span> 的项目参考文献仍保留早期 <span class="latin">arXiv</span> 版本。</p>
+
+    <h2>表 4　训练视角外观指标</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>方法（发表信息）</th><th><span class="latin">PSNR</span>（四个场景）</th><th><span class="latin">SSIM</span>（四个场景）</th><th><span class="latin">LPIPS</span>（四个场景）</th></tr></thead>
+      <tbody>
+        <tr><th><span class="latin">OmniRe</span>（<span class="latin">ICLR 2025</span>）</th><td>32.96 / 36.29 / 31.03 / 34.80</td><td>0.94001 / 0.96728 / 0.94749 / 0.95984</td><td>0.0762 / 0.0419 / 0.0522 / 0.0510</td></tr>
+        <tr class="ours"><th><span class="latin">GECO-GS</span>（本文）</th><td>32.80 / 36.13 / 31.05 / 34.75</td><td>0.94028 / 0.96673 / 0.94611 / 0.95978</td><td>0.0752 / 0.0411 / 0.0548 / 0.0508</td></tr>
+      </tbody>
+    </table></div>
+    <p class="table-caption">注：这些指标均为记录视角的训练视角结果；<span class="latin">GECO-GS</span> 的 <span class="latin">PSNR</span> 范围为 <span class="math">31.05–36.13 dB</span>。</p>
+  </section>
+
+  <section id="figures" class="figures-section">
+      <div class="section-title-row"><p class="section-label">二、定性结果</p><p class="section-side">论文图 4–8</p></div>
+
+    <figure><div class="figure-heading"><span>图 4</span></div>
+      <img src="qualitative_fig4.png" alt="图 4：三组驾驶场景中五种方法的 RGB 和 LiDAR 深度误差比较" loading="lazy">
+      <figcaption>图 4　<span class="math">3 m</span> 横向右移下的定性比较。三组驾驶场景分别展示五种方法的彩色渲染结果和回投影激光雷达深度绝对误差，误差范围为 <span class="math">0–2 m</span>。</figcaption>
+    </figure>
+
+    <figure><div class="figure-heading"><span>图 5</span></div>
+      <img src="right_qualitative.png" alt="图 5：三米横向右移下 OmniRe 与 GECO-GS 的定性比较" loading="lazy">
+      <figcaption>图 5　<span class="math">3 m</span> 横向右移下 <span class="latin">OmniRe</span> 与 <span class="latin">GECO-GS</span> 的比较。上方差异图表示两种渲染结果的彩色图像差异，不是优劣指标；下方为 <span class="math">e<sub>OmniRe</sub> − e<sub>GECO-GS</sub></span> 的带符号激光雷达误差差值，冷色表示 <span class="latin">GECO-GS</span> 误差更低。</figcaption>
+    </figure>
+
+    <figure><div class="figure-heading"><span>图 6</span></div>
+      <img src="yaw_qualitative.png" alt="图 6：正向偏航三十度和六十度下 OmniRe 与 GECO-GS 的定性比较" loading="lazy">
+      <figcaption>图 6　正向偏航 <span class="math">+30°</span> 和 <span class="math">+60°</span> 下 <span class="latin">OmniRe</span> 与 <span class="latin">GECO-GS</span> 的比较。图中同时给出彩色图像差异和带符号激光雷达误差改善图。</figcaption>
+    </figure>
+
+    <figure><div class="figure-heading"><span>图 7</span></div>
+      <img class="ablation-image" src="ablation_metrics.png" alt="图 7：三米横向右移下的几何监督分支消融结果" loading="lazy">
+      <figcaption>图 7　<span class="math">3 m</span> 横向右移下的分支消融。分别去除世界表面、车辆表面和射线距离监督；柱高表示相对 <span class="latin">Full</span> 的全场景 <span class="latin">L1</span>、静态区域 <span class="latin">L1</span> 和 <span class="math">Inlier₀.₅</span> 退化，误差条为总体标准差。</figcaption>
+    </figure>
+
+    <figure><div class="figure-heading"><span>图 8</span></div>
+      <img class="shift-image" src="shift_response_fig8.png" alt="图 8：不同方法在横向视点变化下的误差分布曲线" loading="lazy">
+      <figcaption>图 8　五个驾驶场景中匹配视图的误差分布。横轴为评测视图百分位，纵轴分别为全场景深度 <span class="latin">L1</span> 和 <span class="latin">Chamfer-L1</span>；曲线越低表示误差越小。</figcaption>
+    </figure>
+  </section>
+
+  <section id="protocol" class="protocol-section">
+    <p class="section-label">三、实验设置与说明</p>
+    <dl class="protocol-list">
+      <div><dt>数据集</dt><dd><span class="latin">Waymo Open Dataset</span>，五个驾驶场景。</dd></div>
+      <div><dt>横向外推</dt><dd>相机向车辆右侧平移 <span class="math">1–3 m</span>；表格中的 <span class="math">0 m</span> 是记录视角基准。</dd></div>
+      <div><dt>偏航外推</dt><dd>相机中心不变，绕车辆竖直轴正向旋转 <span class="math">+30°</span> 和 <span class="math">+60°</span>。</dd></div>
+      <div><dt>几何参考</dt><dd>将激光雷达点回投影到查询相机，计算全场景、静态区域和车辆区域的深度误差。</dd></div>
+      <div><dt>外观指标</dt><dd><span class="latin">PSNR</span>、<span class="latin">SSIM</span> 和 <span class="latin">LPIPS</span> 只在训练视角报告；外推视角没有对应的彩色图像真值。</dd></div>
+    </dl>
+    <p class="license-note">本页面使用 <span class="latin">Waymo Open Dataset</span> 的派生可视化结果。正式公开前请自行核对数据集许可与署名要求。</p>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="page-width"><span class="latin">GECO-GS</span> · 本地预览页面</div></footer>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CARLA 与 3DGS 驱动的自动驾驶场景编辑与渲染系统：轨迹执行、动态目标编辑与神经渲染结果展示。">
+  <title>部分实验结果展示｜CARLA 与 3DGS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="page-width">
+  <h1 class="page-title">部分实验结果展示</h1>
+
+  <section class="intro" id="top">
+    <p class="project-name">CARLA 与 <span class="latin">3DGS</span> 驱动的自动驾驶场景编辑与渲染系统</p>
+    <p>基于实习期间完成的驾驶场景动态 <span class="latin">3DGS</span> 重建与新视角编辑管线，参考未提供官方实现的 <span class="latin">CARLA-GS</span>（发表于 2026 年 7 月 8 日），在既有代码基础上完成核心流程的工程复现与接口适配；搭建 <span class="latin">CARLA 0.9.16</span> 轨迹执行与 <span class="latin">OmniRe</span> 回投影流程，基于 <span class="latin">CARLA</span> 内置 <span class="latin">PID</span> 控制器实现 <span class="latin">waypoint</span> 跟踪，并完成执行轨迹与场景的时间、坐标、姿态及坡道高程对齐。</p>
+    <p class="note">场景来源：<span class="latin">Waymo Open Dataset</span> 公共数据集中的真实街景序列，而非 <span class="latin">CARLA</span> 虚拟地图；本页主要展示动态目标编辑、轨迹执行和神经渲染的定性结果。</p>
+  </section>
+
+  <section id="workflow" class="workflow-section">
+    <div class="section-title-row"><p class="section-label">一、实现流程</p><p class="section-side">从参考轨迹到场景回投影</p></div>
+    <div class="table-wrap"><table class="workflow-table">
+      <thead><tr><th>模块</th><th>项目内实现</th><th>输出或作用</th></tr></thead>
+      <tbody>
+        <tr><th>场景表示</th><td><span class="latin">Waymo Open Dataset</span> 真实街景序列 + <span class="latin">OmniRe</span> 动态 <span class="latin">3DGS</span>；背景与 <span class="latin">RigidNodes</span> / <span class="latin">SMPLNodes</span></td><td>保留公共数据集真实街景外观，并支持动态实体逐帧编辑</td></tr>
+        <tr><th>轨迹执行</th><td><span class="latin">CARLA 0.9.16</span> 同步步进、<span class="latin">waypoint</span> 跟踪与内置 <span class="latin">PID</span> 控制</td><td>执行邻车切入、前车急刹等参考轨迹</td></tr>
+        <tr><th>风险规划</th><td>基于 <span class="latin">DeepSeek</span> 大语言模型（<span class="latin">LLM</span>）的双智能体</td><td>选择风险车辆与冲突区域、估计 <span class="latin">TTC</span>、生成参考轨迹</td></tr>
+        <tr><th>轨迹回投影</th><td>时间、平面坐标、姿态和道路高程对齐；逐帧写入 <span class="latin">RigidNodes</span></td><td>将执行结果重新渲染到真实街景场景</td></tr>
+        <tr><th>交互驾驶</th><td><span class="latin">WASD</span> 键盘控制、阿克曼自行车运动学更新与视角切换</td><td>支持实时浏览和手动驾驶场景编辑</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="llm-trace" class="llm-section">
+    <div class="section-title-row"><p class="section-label">二、LLM 规划过程回放</p><p class="section-side">左侧视频 · 右侧日志</p></div>
+    <p class="trace-explainer"><span>术语说明</span>：<span class="latin">TTC</span>（预计碰撞时间）表示按当前相对位置与速度估算进入冲突区域所需的时间；“高风险”是 <span class="latin">LLM</span> 根据目标行为、空间关系和 <span class="latin">TTC</span> 返回的离散标签，不等同于已经发生碰撞。<span class="latin">Agent&lt;Zone&gt;</span> 负责选车和选区域，<span class="latin">Agent&lt;Trajectory&gt;</span> 负责生成带时间戳的参考轨迹；后续控制和渲染由程序完成。</p>
+    <div class="trace-layout">
+      <figure class="trace-video">
+        <div class="figure-heading"><span>白车单目标轨迹编辑</span><span class="trace-meta">左：80 帧对比视频</span></div>
+        <video id="trace-video-player" class="trace-video-player" controls muted autoplay loop preload="metadata" playsinline poster="posters/level1_multi_agent_compare_80f.jpg">
+          <source src="videos/level1_multi_agent_compare_80f.mp4" type="video/mp4">
+          当前浏览器不支持视频播放。
+        </video>
+        <figcaption>场景来自 <span class="latin">Waymo Open Dataset</span> 的真实街景序列；左侧视频为原始与编辑结果对照，右半边可见白色轿车沿编辑轨迹向前驶离，行人和背景交通保持场景运动。</figcaption>
+      </figure>
+      <div class="trace-log-card">
+        <div class="trace-log-heading"><span>LLM 决策与执行过程回放</span><button id="replay-log" type="button">从头播放</button></div>
+        <div id="llm-log-output" class="trace-log" role="log" aria-live="polite" aria-label="LLM 规划日志"></div>
+        <p class="trace-note">带“LLM”标签的行是项目内 <span class="latin">DeepSeek</span> 结构化结果的中文摘要；其余行是轨迹校验、<span class="latin">CARLA</span> 执行和 <span class="latin">3DGS</span> 回投影状态。日志与视频的播放、暂停、拖动和循环同步；关键帧为 F20 = 2.0 s、F45 = 4.5 s、F70 = 7.0 s。页面不调用 API。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="videos" class="figures-section">
+    <div class="section-title-row"><p class="section-label">三、前车急刹场景回放</p><p class="section-side">视频与日志同步展示</p></div>
+
+    <div class="trace-layout trace-layout-braking">
+      <figure class="trace-video">
+        <div class="figure-heading"><span>视频 2 · 前车急刹</span><span class="trace-meta">左：141 帧对比视频</span></div>
+        <video id="braking-video-player" class="trace-video-player" controls muted autoplay loop preload="metadata" playsinline poster="posters/scene552_dynamic_bus_braking_compare_14s.jpg">
+          <source src="videos/scene552_dynamic_bus_braking_compare_14s.mp4" type="video/mp4">
+          当前浏览器不支持视频播放。
+        </video>
+        <figcaption>场景来自 <span class="latin">Waymo Open Dataset</span> 的 Scene 552 真实街景序列；左侧为原始画面与编辑结果对照，右半边展示前方公交的急刹轨迹执行与后续 <span class="latin">3DGS</span> 回投影。</figcaption>
+      </figure>
+      <div class="trace-log-card">
+        <div class="trace-log-heading"><span>LLM 急刹规划与执行回放</span><button id="replay-braking-log" type="button">从头播放</button></div>
+        <div id="braking-log-output" class="trace-log" role="log" aria-live="polite" aria-label="前车急刹规划日志"></div>
+        <p class="trace-note">日志与左侧视频同步。<span class="latin">TTC</span> 表示按相对距离和相对速度估算进入冲突区域的时间；本段只展示项目中实际落盘的场景规划、轨迹执行和回投影状态，不补写未保存的数值。</p>
+      </div>
+    </div>
+
+  </section>
+
+  <section id="notes" class="protocol-section">
+    <p class="section-label">四、展示说明</p>
+    <dl class="protocol-list">
+      <div><dt>画面来源</dt><dd>视频基于 <span class="latin">Waymo Open Dataset</span> 公共数据集的真实街景序列，经动态 <span class="latin">3DGS</span> 重建与编辑后渲染；左右对照视频中的文字标注沿用生成时的标注。</dd></div>
+      <div><dt>控制边界</dt><dd><span class="latin">CARLA</span> 在本项目中负责轨迹执行与控制量平滑，页面不将其表述为完整的碰撞物理仿真器。</dd></div>
+      <div><dt>结果性质</dt><dd>本页以定性视频为主，展示工程流程和场景编辑效果；轨迹文件、脚本和配置保存在项目目录中。</dd></div>
+    </dl>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="page-width"><span class="latin">CARLA</span> · <span class="latin">3DGS</span> · 本地预览页面</div></footer>
+<script>
+(() => {
+  const video = document.getElementById('trace-video-player');
+  const output = document.getElementById('llm-log-output');
+  const replayButton = document.getElementById('replay-log');
+  let renderedCount = 0;
+  let lastVideoTime = 0;
+  let frameRequest = 0;
+
+  const lines = [
+    [0.00, '系统', '加载场景 172 的动态 3DGS｜对比视频：80 帧，10 fps'],
+    [0.10, 'LLM·输入', '输入自车状态、候选车辆历史轨迹与目标行为；坐标约定：x 前向，y 左向'],
+    [0.25, 'LLM·区域', 'Agent<Zone>（风险区域智能体）选择车辆 5：左侧白色轿车，作为编辑目标'],
+    [0.40, 'LLM·区域', '冲突区域 = front：自车前方的矩形区域，不是“已经碰撞”的位置'],
+    [0.55, 'LLM·TTC', 'TTC = 1.0 s：按当前相对位置与速度，估算进入 front 区域还需约 1 秒'],
+    [0.70, 'LLM·风险', '风险 = High（高）：短 TTC + 邻车切入行为；为模型返回的风险标签'],
+    [0.78, 'LLM·理由', '模型理由（中文摘要）：车辆 5 与自车速度接近，位于右侧车道，可能切入自车车道并形成前方冲突'],
+    [0.90, 'LLM·轨迹', 'Agent<Trajectory> 生成切入参考轨迹：26 个带时间戳轨迹点，Δt = 0.2 s'],
+    [1.00, 'LLM·约束', '切入轨迹约束：时间递增、x 不回退、横向位移连续、末点进入目标区域'],
+    [1.15, 'LLM·输出', '切入轨迹：y 从 0.0 m 平滑变化至 3.2 m，速度保持 36 km/h'],
+    [1.30, 'LLM·输出', '切入参考轨迹 JSON 解析完成，交给程序做连续性、速度和加速度校验'],
+    [1.55, '程序·校验', '白车轨迹：时间单调、位移连续、速度与加速度约束均通过 ✓'],
+    [1.80, 'CARLA·PID', '将白车参考轨迹转换为可执行的车辆运动序列'],
+    [2.00, '第 20 帧', '白车进入编辑画面，行人经过路口'],
+    [2.40, 'CARLA·PID', '白车沿执行轨迹继续向前行驶'],
+    [3.80, '对齐', '时间插值 + SE(2) 坐标变换 + 四元数姿态更新'],
+    [4.10, '对齐', '为白车拟合道路高程，并将姿态序列写入 RigidNodes'],
+    [4.50, '第 45 帧', '白车经过画面左前方，继续沿编辑轨迹驶离'],
+    [5.00, '场景', '行人和背景交通保持原始时间线，未将其他场景轨迹混入本回放'],
+    [5.80, '3DGS·渲染', '持续渲染 3DGS 背景与白车目标，观察运动连续性'],
+    [7.00, '第 70 帧', '白车已离开左侧近景，背景街景继续渲染'],
+    [7.40, '程序·校验', '80 帧对比完成，帧标记与渲染数量一致 ✓'],
+    [7.80, '完成', '白车轨迹回放与 3DGS 场景回投影完成']
+  ];
+
+  function formatTime(seconds) {
+    return seconds.toFixed(2).padStart(5, '0');
+  }
+
+  function schedule() {
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 8.0;
+    return lines.map((line, index) => ({
+      time: Math.min(Number(line[0]), Math.max(0, duration - 0.05)),
+      tag: line[1],
+      text: line[2]
+    }));
+  }
+
+  function appendEvent(event) {
+    const row = document.createElement('div');
+    row.className = `trace-log-row ${event.tag.includes('校验') || event.tag === '完成' ? 'trace-log-ok' : ''}`;
+    row.innerHTML = `<span class="trace-log-time">[${formatTime(event.time)}]</span><span class="trace-log-tag">${event.tag}</span><span class="trace-log-text"></span>`;
+    row.querySelector('.trace-log-text').textContent = event.text;
+    output.appendChild(row);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function resetLog() {
+    renderedCount = 0;
+    output.innerHTML = '';
+  }
+
+  function renderToVideoTime(time) {
+    const events = schedule();
+    if (time + 0.08 < lastVideoTime) resetLog();
+    while (renderedCount < events.length && events[renderedCount].time <= time + 0.04) {
+      appendEvent(events[renderedCount]);
+      renderedCount += 1;
+    }
+    lastVideoTime = time;
+  }
+
+  function followVideo() {
+    renderToVideoTime(video.currentTime || 0);
+    if (!video.paused && !video.ended) frameRequest = window.requestAnimationFrame(followVideo);
+  }
+
+  function startFollowing() {
+    window.cancelAnimationFrame(frameRequest);
+    followVideo();
+  }
+
+  video.addEventListener('play', startFollowing);
+  video.addEventListener('pause', () => window.cancelAnimationFrame(frameRequest));
+  video.addEventListener('timeupdate', () => renderToVideoTime(video.currentTime || 0));
+  video.addEventListener('seeked', () => {
+    resetLog();
+    lastVideoTime = 0;
+    renderToVideoTime(video.currentTime || 0);
+  });
+  video.addEventListener('loadedmetadata', () => {
+    resetLog();
+    renderToVideoTime(video.currentTime || 0);
+  });
+  replayButton.addEventListener('click', () => {
+    video.currentTime = 0;
+    resetLog();
+    lastVideoTime = 0;
+    video.play().catch(() => {});
+  });
+  renderToVideoTime(0);
+  video.play().catch(() => {});
+})();
+</script>
+<script>
+(() => {
+  const video = document.getElementById('braking-video-player');
+  const output = document.getElementById('braking-log-output');
+  const replayButton = document.getElementById('replay-braking-log');
+  if (!video || !output || !replayButton) return;
+  let renderedCount = 0;
+  let lastVideoTime = 0;
+  let frameRequest = 0;
+
+  const lines = [
+    [0.00, '系统', '加载 Waymo Scene 552 动态 3DGS｜对比视频：141 帧，10 fps，14.1 s'],
+    [0.35, 'LLM·输入', '输入自车状态、前方公交历史轨迹和“行人横穿后紧急停车”的目标行为'],
+    [0.75, 'LLM·区域', 'Agent<Zone> 锁定前方公交 Instance 1｜冲突区域 = front（自车前方）'],
+    [1.05, 'LLM·风险', '风险判断：前车急刹会快速缩短车间距；风险标签用于规划，不等同于画面碰撞检测'],
+    [1.35, 'LLM·TTC', 'TTC：用相对距离与相对速度估算进入 front 区域的剩余时间；本场景不展示未落盘的具体数值'],
+    [1.70, 'LLM·轨迹', 'Agent<Trajectory> 输出 21 个参考点｜Δt = 0.2 s｜规划时长 = 4.0 s'],
+    [2.05, 'LLM·约束', '急刹轨迹：保持公交车道 y = 5.19 m，x 持续前进，速度在约 1.6 s 降至 0 km/h'],
+    [2.35, 'LLM·输出', '结构化参考轨迹写入 deepseek_552_bus_braking_plan.json'],
+    [2.80, '程序·校验', '检查时间递增、速度非负、前向位移连续和加速度范围'],
+    [3.30, 'CARLA·PID', 'PID 跟踪参考轨迹，输出公交执行后的位姿、速度和控制量'],
+    [4.00, 'CARLA·PID', '公交短暂前移后进入减速阶段，保持在原车道内'],
+    [4.50, '第 45 帧', '进入视频中的急刹关键阶段，前方公交姿态开始稳定'],
+    [5.60, '执行', '执行速度接近 0 km/h，公交保持车道位置并继续回放'],
+    [6.80, '对齐', '将执行时间轴与 Scene 552 帧序列对齐，补齐长时序姿态'],
+    [7.50, '第 75 帧', '公交在前方车道保持停驻，自车视角继续向路口推进'],
+    [8.40, '3DGS·回投影', '将公交执行姿态逐帧写入 RigidNodes，并保留背景行人和建筑'],
+    [10.50, '第 105 帧', '长时回放继续：道路标线、行人和公交车身共同渲染'],
+    [11.80, '3DGS·渲染', '持续渲染编辑视角，检查公交车身轮廓与道路接触关系'],
+    [13.50, '第 135 帧', '进入后段路口视角，完成急刹车辆的长时序回放'],
+    [14.00, '完成', '前车急刹轨迹执行与 Scene 552 3DGS 回投影完成']
+  ];
+
+  function formatTime(seconds) {
+    return seconds.toFixed(2).padStart(5, '0');
+  }
+
+  function schedule() {
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 14.1;
+    return lines.map((line) => ({
+      time: Math.min(Number(line[0]), Math.max(0, duration - 0.05)),
+      tag: line[1],
+      text: line[2]
+    }));
+  }
+
+  function appendEvent(event) {
+    const row = document.createElement('div');
+    row.className = `trace-log-row ${event.tag.includes('校验') || event.tag === '完成' ? 'trace-log-ok' : ''}`;
+    row.innerHTML = `<span class="trace-log-time">[${formatTime(event.time)}]</span><span class="trace-log-tag">${event.tag}</span><span class="trace-log-text"></span>`;
+    row.querySelector('.trace-log-text').textContent = event.text;
+    output.appendChild(row);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function resetLog() {
+    renderedCount = 0;
+    output.innerHTML = '';
+  }
+
+  function renderToVideoTime(time) {
+    const events = schedule();
+    if (time + 0.08 < lastVideoTime) resetLog();
+    while (renderedCount < events.length && events[renderedCount].time <= time + 0.04) {
+      appendEvent(events[renderedCount]);
+      renderedCount += 1;
+    }
+    lastVideoTime = time;
+  }
+
+  function followVideo() {
+    renderToVideoTime(video.currentTime || 0);
+    if (!video.paused && !video.ended) frameRequest = window.requestAnimationFrame(followVideo);
+  }
+
+  video.addEventListener('play', () => {
+    window.cancelAnimationFrame(frameRequest);
+    followVideo();
+  });
+  video.addEventListener('pause', () => window.cancelAnimationFrame(frameRequest));
+  video.addEventListener('timeupdate', () => renderToVideoTime(video.currentTime || 0));
+  video.addEventListener('seeked', () => {
+    resetLog();
+    lastVideoTime = 0;
+    renderToVideoTime(video.currentTime || 0);
+  });
+  video.addEventListener('loadedmetadata', () => {
+    resetLog();
+    renderToVideoTime(video.currentTime || 0);
+  });
+  replayButton.addEventListener('click', () => {
+    video.currentTime = 0;
+    resetLog();
+    lastVideoTime = 0;
+    video.play().catch(() => {});
+  });
+  renderToVideoTime(0);
+  video.play().catch(() => {});
+})();
+</script>
+</body>
+</html>

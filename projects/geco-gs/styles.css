@@ -1,0 +1,118 @@
+/* 朴素中文学术项目页；字母、数字和公式统一使用 Times New Roman / 数学字体。 */
+:root {
+  --text: #222;
+  --muted: #666;
+  --line: #cfcfcf;
+  --light-line: #e6e6e6;
+  --link: #164f82;
+  --ours: #f4f7fa;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--text);
+  background: #fff;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
+  font-size: 15px;
+  line-height: 1.75;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { display: block; max-width: 100%; height: auto; }
+.latin, table, .math, mjx-container, .section-side, .site-footer {
+  font-family: "Times New Roman", Times, serif;
+}
+.page-width { width: min(1040px, calc(100% - 48px)); margin: 0 auto; }
+
+main { padding-bottom: 70px; }
+.page-title {
+  margin: 0;
+  padding: 34px 0 18px;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.intro { max-width: 860px; padding: 45px 0 40px; border-bottom: 1px solid var(--line); }
+.intro > p:not(.section-label):not(.note) { margin: 0; font-size: 17px; line-height: 1.9; }
+.section-label { margin: 0 0 17px; color: #333; font-size: 14px; font-weight: 700; letter-spacing: .08em; }
+.note {
+  margin: 18px 0 0;
+  padding-left: 15px;
+  border-left: 3px solid #999;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+section[id] { scroll-margin-top: 20px; }
+#tables { padding-top: 42px; }
+.section-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.section-title-row .section-label { margin-bottom: 10px; }
+.section-side { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+h2 { margin: 34px 0 12px; font-size: 17px; font-weight: 700; line-height: 1.5; }
+.table-wrap { overflow-x: auto; border-top: 1px solid var(--text); border-bottom: 1px solid var(--text); }
+table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px; line-height: 1.45; }
+th, td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--light-line);
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+thead th { border-bottom: 1px solid var(--text); color: #333; font-weight: 700; }
+thead tr + tr th { border-bottom: 1px solid var(--text); font-size: 12px; font-weight: 400; }
+th:first-child, td:first-child { text-align: left; }
+tbody th { font-weight: 400; }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+tbody tr.ours { background: var(--ours); }
+tbody tr.ours th, tbody tr.ours td { font-weight: 700; }
+.narrow-table table { min-width: 900px; }
+.table-caption { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+.figures-section { padding-top: 50px; }
+.figures-section > figure { margin: 35px 0 0; padding-top: 18px; border-top: 1px solid var(--line); }
+.figure-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 12px;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+.figures-section figure img { width: 100%; }
+.figures-section figure img.ablation-image { width: min(100%, 900px); margin: 0 auto; }
+.figures-section figure img.shift-image { width: min(100%, 1000px); margin: 0 auto; }
+figcaption { margin-top: 12px; color: #555; font-size: 13px; line-height: 1.75; }
+
+.protocol-section { padding-top: 52px; }
+.protocol-list { margin: 0; border-top: 1px solid var(--line); }
+.protocol-list > div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--light-line);
+}
+.protocol-list dt { font-weight: 700; }
+.protocol-list dd { margin: 0; color: #555; }
+.license-note { margin: 24px 0 0; color: var(--muted); font-size: 12px; }
+.site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.site-footer .page-width { padding: 18px 0 24px; }
+
+@media (max-width: 760px) {
+  .page-width { width: min(100% - 30px, 620px); }
+  .section-title-row { display: block; }
+  .section-side { margin-top: -4px; }
+  .intro > p:not(.section-label):not(.note) { font-size: 16px; }
+  .protocol-list > div { grid-template-columns: 92px 1fr; gap: 13px; }
+  table { font-size: 12px; }
+  th, td { padding: 8px 8px; }
+}
