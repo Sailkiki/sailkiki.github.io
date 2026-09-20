@@ -154,6 +154,7 @@ tbody tr.ours th, tbody tr.ours td { font-weight: 700; }
 .figures-section figure img.ablation-image { width: min(100%, 900px); margin: 0 auto; }
 .figures-section figure img.shift-image { width: min(100%, 1000px); margin: 0 auto; }
 .video-frame { width: min(100%, 968px); margin: 0 auto; background: #111; }
+.human-drive-video { display: block; width: 100%; height: auto; }
 .video-meta { color: var(--muted); font-size: 13px; font-weight: 400; }
 figcaption { margin-top: 12px; color: #555; font-size: 13px; line-height: 1.75; }
 

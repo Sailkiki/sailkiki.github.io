@@ -72,8 +72,22 @@
 
   </section>
 
+  <section id="human-drive" class="figures-section">
+    <div class="section-title-row"><p class="section-label">四、WASD 手控驾驶轨迹回放</p><p class="section-side">真实街景 · 个人操作轨迹</p></div>
+    <figure>
+      <div class="figure-heading"><span>基于实际键盘操作的右转驾驶</span><span class="trace-meta">204 帧 · 8.16 s</span></div>
+      <div class="video-frame">
+        <video class="human-drive-video" controls muted loop preload="metadata" playsinline poster="posters/wasd_human_drive_replay.jpg">
+          <source src="videos/wasd_human_drive_replay.mp4" type="video/mp4">
+          当前浏览器不支持视频播放。
+        </video>
+      </div>
+      <figcaption>视频由本项目实时驾驶页面导出的个人操作轨迹生成：车辆先前进，再向右转并沿转向后的道路继续行驶；下方同步显示 <span class="latin">W/A/S/D</span> 按键状态。场景来自 <span class="latin">Waymo Open Dataset</span> 公共数据集中的真实街景序列，画面包含动态 <span class="latin">3DGS</span> 场景与学习到的天空环境。</figcaption>
+    </figure>
+  </section>
+
   <section id="notes" class="protocol-section">
-    <p class="section-label">四、展示说明</p>
+    <p class="section-label">五、展示说明</p>
     <dl class="protocol-list">
       <div><dt>画面来源</dt><dd>视频基于 <span class="latin">Waymo Open Dataset</span> 公共数据集的真实街景序列，经动态 <span class="latin">3DGS</span> 重建与编辑后渲染；左右对照视频中的文字标注沿用生成时的标注。</dd></div>
       <div><dt>控制边界</dt><dd><span class="latin">CARLA</span> 在本项目中负责轨迹执行与控制量平滑，页面不将其表述为完整的碰撞物理仿真器。</dd></div>
