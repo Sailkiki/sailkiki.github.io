@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="CARLA 与 3DGS 驱动的自动驾驶场景编辑与渲染系统：轨迹执行、动态目标编辑与神经渲染结果展示。">
-  <title>部分实验结果展示｜CARLA 与 3DGS</title>
+  <meta name="description" content="omnire-carla-gs：CARLA 与 3DGS 驱动的自动驾驶场景编辑与渲染系统。">
+  <title>omnire-carla-gs｜CARLA 与 3DGS</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <h1 class="page-title">部分实验结果展示</h1>
 
   <section class="intro" id="top">
-    <p class="project-name">CARLA 与 <span class="latin">3DGS</span> 驱动的自动驾驶场景编辑与渲染系统</p>
+    <p class="project-name"><span class="latin">omnire-carla-gs</span>：<span class="latin">CARLA</span> 与 <span class="latin">3DGS</span> 驱动的自动驾驶场景编辑与渲染系统</p>
     <p>基于实习期间完成的驾驶场景动态 <span class="latin">3DGS</span> 重建与新视角编辑管线，参考未提供官方实现的 <span class="latin">CARLA-GS</span>（发表于 2026 年 7 月 8 日），在既有代码基础上完成核心流程的工程复现与接口适配；搭建 <span class="latin">CARLA 0.9.16</span> 轨迹执行与 <span class="latin">OmniRe</span> 回投影流程，基于 <span class="latin">CARLA</span> 内置 <span class="latin">PID</span> 控制器实现 <span class="latin">waypoint</span> 跟踪，并完成执行轨迹与场景的时间、坐标、姿态及坡道高程对齐。</p>
     <p class="note">场景来源：<span class="latin">Waymo Open Dataset</span> 公共数据集中的真实街景序列，而非 <span class="latin">CARLA</span> 虚拟地图；本页主要展示动态目标编辑、轨迹执行和神经渲染的定性结果。</p>
   </section>
@@ -82,7 +82,7 @@
   </section>
 </main>
 
-<footer class="site-footer"><div class="page-width"><span class="latin">CARLA</span> · <span class="latin">3DGS</span> · 本地预览页面</div></footer>
+<footer class="site-footer"><div class="page-width"><span class="latin">omnire-carla-gs</span> · <span class="latin">CARLA</span> · <span class="latin">3DGS</span> · 本地预览页面</div></footer>
 <script>
 (() => {
   const video = document.getElementById('trace-video-player');
